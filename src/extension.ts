@@ -39,8 +39,6 @@ export function activate(context: vscode.ExtensionContext) {
 		};
 
 		// Detects speech in the audio file
-		const [operation] = await client.longRunningRecognize(request);
-
 
 
 
