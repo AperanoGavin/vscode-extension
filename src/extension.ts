@@ -12,50 +12,47 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.window.showInformationMessage('Do you want to allow VSCode to access your microphone?', 'Yes', 'No').then((answer) => {
 		if (answer === 'Yes') {
 			//si l'utilisateur accepte, on lance la fonction qui va écouter le micro
-			startListening();
+			//startListening();
 		}
 	});
 
-	//fonction qui va écouter le micro
-	function startListening() {
-		//on demande à l'utilisateur de parler
-		vscode.window.showInformationMessage('Speak now');
+				// Imports the Google Cloud client library
+			const speech = require('@google-cloud/speech');
 
-		const gcsUri = 'gs://cloud-samples-data/speech/brooklyn_bridge.raw';
+			// Creates a client
+			const client = new speech.SpeechClient();
 
-		// The audio file's encoding, sample rate in hertz, and BCP-47 language code
-		const audio = {
-			uri: gcsUri,
-		};
-		//on écoute le micro
+			async function quickstart() {
+			// The path to the remote LINEAR16 file
+			const gcsUri = 'gs://cloud-samples-data/speech/brooklyn_bridge.raw';
 
-		const request = {
-			config: {
+			// The audio file's encoding, sample rate in hertz, and BCP-47 language code
+			const audio = {
+				uri: gcsUri,
+			};
+			const config = {
 				encoding: 'LINEAR16',
 				sampleRateHertz: 16000,
 				languageCode: 'fr-FR',
-			},
-			interimResults: false, // If you want interim results, set this to true
-		};
+			};
+			const request = {
+				audio: audio,
+				config: config,
+			};
 
-		// Detects speech in the audio file
+			// Detects speech in the audio file
+			// Detects speech in the audio file
+			const [response] = await client.recognize(request);
+			const transcription = response.results
+				//.map(result => result.alternatives[0].transcript) ne marche pas
+				.map((result: any) => result.alternatives[0].transcript)
+				.join('\n');
+			console.log(`Transcription: ${transcription}`);
+			}
 
+			quickstart();
 
-
-		//si l'utilisateur dit "ouvre le terminal", on ouvre le terminal et on arrête d'écouter le micro
-		vscode.commands.executeCommand('workbench.action.terminal.toggleTerminal').then(() => {
-			stopListening();
-		}
-		);
-
-		//fonction qui arrête d'écouter le micro
-		function stopListening() {
-			//on demande à l'utilisateur de ne plus parler
-			vscode.window.showInformationMessage('Stop speaking');
-
-		}
-		
-}
+	
 }
 
 // This method is called when your extension is deactivated
