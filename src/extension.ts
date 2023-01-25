@@ -2,6 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 const speech = require('@google-cloud/speech');
+const recorder = require('node-record-lpcm16');
 const client = new speech.SpeechClient();
 
 
@@ -16,41 +17,52 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-				// Imports the Google Cloud client library
-			const speech = require('@google-cloud/speech');
 
-			// Creates a client
-			const client = new speech.SpeechClient();
-
-			async function quickstart() {
-			// The path to the remote LINEAR16 file
-			const gcsUri = 'gs://cloud-samples-data/speech/brooklyn_bridge.raw';
-
-			// The audio file's encoding, sample rate in hertz, and BCP-47 language code
-			const audio = {
-				uri: gcsUri,
-			};
-			const config = {
-				encoding: 'LINEAR16',
-				sampleRateHertz: 16000,
-				languageCode: 'fr-FR',
-			};
-			const request = {
-				audio: audio,
-				config: config,
-			};
-
-			// Detects speech in the audio file
-			// Detects speech in the audio file
-			const [response] = await client.recognize(request);
-			const transcription = response.results
-				//.map(result => result.alternatives[0].transcript) ne marche pas
-				.map((result: any) => result.alternatives[0].transcript)
-				.join('\n');
-			console.log(`Transcription: ${transcription}`);
-			}
-
-			quickstart();
+	
+	/**
+	 * TODO(developer): Uncomment the following lines before running the sample.
+	 */
+	// const encoding = 'Encoding of the audio file, e.g. LINEAR16';
+	// const sampleRateHertz = 16000;
+	// const languageCode = 'BCP-47 language code, e.g. en-US';
+	
+	const request = {
+	  config: {
+		encoding: encoding,
+		sampleRateHertz: sampleRateHertz,
+		languageCode: languageCode,
+	  },
+	  interimResults: false, // If you want interim results, set this to true
+	};
+	
+	// Create a recognize stream
+	const recognizeStream = client
+	  .streamingRecognize(request)
+	  .on('error', console.error)
+	  .on('data', data =>
+		process.stdout.write(
+		  data.results[0] && data.results[0].alternatives[0]
+			? `Transcription: ${data.results[0].alternatives[0].transcript}\n`
+			: '\n\nReached transcription time limit, press Ctrl+C\n'
+		)
+	  );
+	
+	// Start recording and send the microphone input to the Speech API.
+	// Ensure SoX is installed, see https://www.npmjs.com/package/node-record-lpcm16#dependencies
+	recorder
+	  .record({
+		sampleRateHertz: sampleRateHertz,
+		threshold: 0,
+		// Other options, see https://www.npmjs.com/package/node-record-lpcm16#options
+		verbose: false,
+		recordProgram: 'rec', // Try also "arecord" or "sox"
+		silence: '10.0',
+	  })
+	  .stream()
+	  .on('error', console.error)
+	  .pipe(recognizeStream);
+	
+	console.log('Listening, press Ctrl+C to stop.');
 
 	
 }
