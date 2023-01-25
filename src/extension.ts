@@ -22,9 +22,9 @@ export function activate(context: vscode.ExtensionContext) {
 	/**
 	 * TODO(developer): Uncomment the following lines before running the sample.
 	 */
-	// const encoding = 'Encoding of the audio file, e.g. LINEAR16';
-	// const sampleRateHertz = 16000;
-	// const languageCode = 'BCP-47 language code, e.g. en-US';
+	 const encoding = 'Encoding of the audio file, e.g. LINEAR16';
+	 const sampleRateHertz = 16000;
+	 const languageCode = 'BCP-47 language code, e.g. en-US';
 	
 	const request = {
 	  config: {
@@ -39,7 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const recognizeStream = client
 	  .streamingRecognize(request)
 	  .on('error', console.error)
-	  .on('data', data =>
+	  .on('data',(data: any) =>
 		process.stdout.write(
 		  data.results[0] && data.results[0].alternatives[0]
 			? `Transcription: ${data.results[0].alternatives[0].transcript}\n`
