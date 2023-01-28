@@ -10,6 +10,10 @@ const client = new speech.SpeechClient();
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 	//demander à l'utilisateur si vscode peut accéder à son micro
+	//ecrire dans la console de vscode pour dire que l'extension est activée
+	let outputChannel = vscode.window.createOutputChannel("Mon Extension");
+	outputChannel.appendLine("Hello World!");
+	outputChannel.show();
 	vscode.window.showInformationMessage('Do you want to allow VSCode to access your microphone?', 'Yes', 'No').then((answer) => {
 		if (answer === 'Yes') {
 			//si l'utilisateur accepte, on lance la fonction qui va écouter le micro
